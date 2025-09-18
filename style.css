@@ -1,0 +1,17 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  text-align: center;
+  align-content: center;
+  height: 100%;
+}
+
+form {
+  display: grid;
+  width: min-content;
+  margin: auto;
+  gap: 6px;
+}
