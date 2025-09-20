@@ -1,6 +1,7 @@
 const [form] = document.forms
 const users = []
 
+handleVisitor()
 load()
 
 form.onsubmit = handleSubmit
@@ -27,7 +28,6 @@ function save() {
   const json = JSON.stringify(users)
 
   localStorage.users = json
-
 }
 
 function load() {
@@ -46,4 +46,12 @@ function isOccupied(login) {
 
     return users.some(u => u.login === login)
   }
+}
+
+function handleVisitor() {
+  const login = localStorage.currentUser
+
+  if (login) location.href = 'private.html'
+
+  document.body.hidden = false
 }

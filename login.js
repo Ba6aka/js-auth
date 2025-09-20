@@ -1,6 +1,7 @@
 const [form] = document.forms
 const users = []
 
+handleVisitor()
 load()
 
 form.onsubmit = handleSubmit
@@ -33,4 +34,12 @@ function load() {
 
 function setCurrentUser(login) {
   localStorage.currentUser = login
+}
+
+function handleVisitor() {
+  const login = localStorage.currentUser
+
+  if (login) location.href = 'private.html'
+
+  document.body.hidden = false
 }
