@@ -11,6 +11,9 @@ function handleSubmit() {
 
   for (const user of users) {
     if (login == user.login && password == user.password) {
+
+      setCurrentUser(login)
+
       return location.href = 'private.html'
     }
   }
@@ -26,4 +29,8 @@ function load() {
   const loadedUsers = JSON.parse(json)
 
   users.push(...loadedUsers)
+}
+
+function setCurrentUser(login) {
+  localStorage.currentUser = login
 }
