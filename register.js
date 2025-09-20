@@ -1,5 +1,8 @@
 const [form] = document.forms
 const users = []
+
+load()
+
 form.onsubmit = handleSubmit
 
 function handleSubmit() {
@@ -20,6 +23,16 @@ function handleSubmit() {
 
 function save() {
   const json = JSON.stringify(users)
-  
+
   localStorage.users = json
+}
+
+function load() {
+  const json = localStorage.users
+
+  if (!json) return
+
+  const loadedUsers = JSON.parse(json)
+
+  users.push(...loadedUsers)
 }
