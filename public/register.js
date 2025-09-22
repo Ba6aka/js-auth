@@ -15,19 +15,18 @@ function handleSubmit() {
     return alert('password missmatch')
   }
 
-  if (!isOccupied(login)) {
+  //if (!isOccupied(login)) {
     users.push(user)
     save()
     alert('Registered successfully. Please log in now')
-  }
+  
 
-  else alert('this login already registered')
+  //else alert('this login already registered')
 }
 
 function save() {
-  const json = JSON.stringify(users)
-
-  localStorage.users = json
+  const init = {method:'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(users)}
+  fetch('/user',init)
 }
 
 function load() {

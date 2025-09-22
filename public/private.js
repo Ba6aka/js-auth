@@ -1,7 +1,6 @@
 const [logoutBtn] = document.getElementsByTagName('button')
 const [output] = document.getElementsByTagName('output')
 
-
 handleVisitor()
 
 logoutBtn.onclick = handleLogout
