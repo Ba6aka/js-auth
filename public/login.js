@@ -22,12 +22,8 @@ function handleSubmit() {
   alert('incorrect login or password, please try again')
 }
 
-function load() {
-  const json = localStorage.users
-
-  if (!json) return
-
-  const loadedUsers = JSON.parse(json)
+async function load() {
+  const loadedUsers = await fetch('/api/users').then(res => res.json())
 
   users.push(...loadedUsers)
 }

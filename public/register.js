@@ -2,7 +2,7 @@ const [form] = document.forms
 const users = []
 
 handleVisitor()
-load()
+// load()
 
 form.onsubmit = handleSubmit
 
@@ -26,15 +26,11 @@ function handleSubmit() {
 
 function save() {
   const init = {method:'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(users)}
-  fetch('/user',init)
+  fetch('/api/users',init)
 }
 
-function load() {
-  const json = localStorage.users
-
-  if (!json) return
-
-  const loadedUsers = JSON.parse(json)
+async function load() {
+  const loadedUsers = await fetch('/api/users').then(res => res.json())
 
   users.push(...loadedUsers)
 }
