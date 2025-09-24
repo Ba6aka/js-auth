@@ -2,30 +2,22 @@ const [form] = document.forms
 const users = []
 
 handleVisitor()
-load()
 
 form.onsubmit = handleSubmit
 
-function handleSubmit() {
+async function handleSubmit() {
   const login = form.login.value
   const password = form.password.value
 
-  for (const user of users) {
-    if (login == user.login && password == user.password) {
+  const accessGranted = await logIn(login, password)
+  if (accessGranted == 'true') {
+    
+    setCurrentUser(login)
 
-      setCurrentUser(login)
-
-      return location.href = 'private.html'
-    }
+    return location.href = 'private.html'
   }
 
   alert('incorrect login or password, please try again')
-}
-
-async function load() {
-  const loadedUsers = await fetch('/api/users').then(res => res.json())
-
-  users.push(...loadedUsers)
 }
 
 function setCurrentUser(login) {
@@ -38,4 +30,14 @@ function handleVisitor() {
   if (login) location.href = 'private.html'
 
   document.body.hidden = false
+}
+
+async function logIn(login, password) {
+  const user = { login, password }
+  const init = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(user) }
+  const res = await fetch('/api/log-in', init)
+
+  const text = await res.text()
+
+  return text
 }
