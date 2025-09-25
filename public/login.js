@@ -11,7 +11,7 @@ async function handleSubmit() {
 
   const accessGranted = await logIn(login, password)
   if (accessGranted == 'true') {
-    
+
     setCurrentUser(login)
 
     return location.href = 'private.html'
@@ -21,10 +21,10 @@ async function handleSubmit() {
 }
 
 function setCurrentUser(login) {
-  localStorage.currentUser = login
+  localStorage.currentUser =login
 }
 
-function handleVisitor() {
+async function handleVisitor() {
   const login = localStorage.currentUser
 
   if (login) location.href = 'private.html'
@@ -37,7 +37,5 @@ async function logIn(login, password) {
   const init = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(user) }
   const res = await fetch('/api/log-in', init)
 
-  const text = await res.text()
-
-  return text
+  return res.text()
 }

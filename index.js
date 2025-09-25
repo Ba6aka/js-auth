@@ -1,9 +1,11 @@
-const { createReadStream, createWriteStream, readFileSync } = require('fs')
+const { createReadStream, readFileSync, writeFileSync } = require('fs')
 const { Server } = require('http')
 const { Readable, Stream } = require('stream')
-
+const users = []
 const path = 'data/users.json'
 
+
+loadUsers()
 runServer(999, handleRequest)
 
 function runServer(port, handler) {
@@ -35,20 +37,12 @@ async function handleAPI(request, response) {
     usersStream.pipe(response)
   }
 
-  else if (request.method == 'POST' && route == 'users') {
-    request.pipe(createWriteStream(path))
+  else if (request.method == 'GET' && route == 'current-user') {
+    createReadStream('data/current-user.json').pipe(response)
   }
 
-  else if (request.method == 'POST' && route == 'log-in') {
-    const json = JSON.parse(readFileSync(path, 'utf8'))
-    request.body = await getBody(request)
-    let answer = 'false'
-    if (checkUser(json, request.body)) {
-      answer = 'true'
-    }
 
-    Readable.from(answer).pipe(response)
-  }
+  handlePostAPI(request, response, route)
 }
 
 function handle404(response) {
@@ -65,10 +59,39 @@ async function getBody(stream) {
   return body
 }
 
-
-function checkUser(json, user) {
-for (const {login,password} of json) {
-  if (login == user.login && password == user.password) return true
+function checkUser({ login, password }) {
+  for (const u of users) {
+    if (login == u.login) {
+      return password == u.password
+    }
+  }
+  return false
 }
-return false
+
+async function handlePostAPI(request, response, route) {
+  if (request.method == 'POST' && route == 'user') {
+    const newUser = await getBody(request)
+
+    users.push(newUser)
+    saveUsers()
+  }
+
+  else if (request.method == 'POST' && route == 'log-in') {
+    const credentials = await getBody(request)
+
+    Readable.from(checkUser(credentials).toString()).pipe(response)
+  }
+
+}
+
+function loadUsers() {
+  const loadedUsers = JSON.parse(readFileSync(path, 'utf8'))
+
+  users.push(...loadedUsers)
+}
+
+function saveUsers() {
+  const json = JSON.stringify(users)
+
+  writeFileSync(path, json)
 }

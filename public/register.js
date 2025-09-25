@@ -1,8 +1,6 @@
 const [form] = document.forms
-const users = []
 
 handleVisitor()
-// load()
 
 form.onsubmit = handleSubmit
 
@@ -16,23 +14,20 @@ function handleSubmit() {
   }
 
   //if (!isOccupied(login)) {
-    users.push(user)
-    save()
-    alert('Registered successfully. Please log in now')
-  
+  registerUser(user)
+  alert('Registered successfully. Please log in now')
+
 
   //else alert('this login already registered')
 }
 
-function save() {
-  const init = {method:'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(users)}
-  fetch('/api/users',init)
-}
-
-async function load() {
-  const loadedUsers = await fetch('/api/users').then(res => res.json())
-
-  users.push(...loadedUsers)
+function registerUser(user) {
+  const init = {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(user)
+  }
+  fetch('/api/user', init)
 }
 
 function isOccupied(login) {
@@ -50,3 +45,4 @@ function handleVisitor() {
 
   document.body.hidden = false
 }
+
