@@ -2,6 +2,7 @@ const [form] = document.forms
 
 handleVisitor()
 
+form.button.onclick = trimValues
 form.onsubmit = handleSubmit
 
 async function handleSubmit() {
@@ -44,3 +45,7 @@ function handleVisitor() {
   document.body.hidden = false
 }
 
+function trimValues() {
+  form.login.value = form.login.value.trim()
+  form.login.value = form.login.value.trim()
+}
