@@ -72,8 +72,14 @@ async function handlePostAPI(request, response, route) {
   if (request.method == 'POST' && route == 'user') {
     const newUser = await getBody(request)
 
-    users.push(newUser)
-    saveUsers()
+    if (isOccupied(newUser.login)) {
+      response.end('occupied')
+    }
+    else {
+      users.push(newUser)
+      saveUsers()
+      response.end('registered')
+    }
   }
 
   else if (request.method == 'POST' && route == 'log-in') {
@@ -94,4 +100,8 @@ function saveUsers() {
   const json = JSON.stringify(users)
 
   writeFileSync(path, json)
+}
+
+function isOccupied(login) {
+  return users.some(u => u.login == login)
 }

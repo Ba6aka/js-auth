@@ -4,30 +4,28 @@ handleVisitor()
 
 form.onsubmit = handleSubmit
 
-function handleSubmit() {
+async function handleSubmit() {
   const login = form.login.value.toLowerCase()
   const password = form.password.value
   const user = { login, password }
 
-  if (form.password2.value != password) {
-    return alert('password missmatch')
-  }
+  if (form.password2.value != password) return alert('password missmatch')
 
-  //if (!isOccupied(login)) {
-  registerUser(user)
-  alert('Registered successfully. Please log in now')
+  const result = await registerUser(user)
 
-
-  //else alert('this login already registered')
+  if (result == 'registered') alert('Registered successfully. Please log in now')
+  else if (result == 'occupied') alert('this login already registered')
 }
 
-function registerUser(user) {
+async function registerUser(user) {
   const init = {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(user)
   }
-  fetch('/api/user', init)
+  const response = await fetch('/api/user', init)
+
+  return response.text()
 }
 
 function isOccupied(login) {
