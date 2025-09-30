@@ -4,7 +4,6 @@ const { Readable, Stream } = require('stream')
 const users = []
 const path = 'data/users.json'
 
-
 loadUsers()
 runServer(999, handleRequest)
 
@@ -29,20 +28,22 @@ function serveStatic(request, response) {
   createReadStream(path).on('error', handle404(response)).pipe(response)
 }
 
-async function handleAPI(request, response) {
+function handleAPI(request, response) {
   const route = request.url.slice(5)
 
-  if (request.method == 'GET' && route == 'users') {
+  if (request.method == 'GET') handleGetAPI(request, route, response)
+  if (request.method == 'POST') handlePostAPI(request, response, route)
+}
+
+function handleGetAPI(request, route, response) {
+  if (route == 'users') {
     const usersStream = createReadStream(path)
     usersStream.pipe(response)
   }
 
-  else if (request.method == 'GET' && route == 'current-user') {
+  else if (route == 'current-user') {
     createReadStream('data/current-user.json').pipe(response)
   }
-
-
-  handlePostAPI(request, response, route)
 }
 
 function handle404(response) {
@@ -62,14 +63,14 @@ async function getBody(stream) {
 function checkUser({ login, password }) {
   for (const u of users) {
     if (login == u.login) {
-      return password == u.password
+      return password == u.password && u
     }
   }
   return false
 }
 
 async function handlePostAPI(request, response, route) {
-  if (request.method == 'POST' && route == 'user') {
+  if (route == 'user') {
     const newUser = await getBody(request)
 
     if (isOccupied(newUser.login)) {
@@ -82,10 +83,28 @@ async function handlePostAPI(request, response, route) {
     }
   }
 
-  else if (request.method == 'POST' && route == 'log-in') {
+  else if (route == 'log-in') {
     const credentials = await getBody(request)
+    const user = checkUser(credentials)
 
-    Readable.from(checkUser(credentials).toString()).pipe(response)
+    if (user) {
+      const token = generateToken()
+
+      response.end(token)
+      user.token = token
+      saveUsers()
+    }
+    else {
+      response.statusCode = 401
+      response.end()
+    }
+  }
+
+  else if (route == 'auth') {
+    const token = await getBody(request)
+    const login = recognizeToken(token)
+
+    response.end(login || '')
   }
 
 }
@@ -104,4 +123,19 @@ function saveUsers() {
 
 function isOccupied(login) {
   return users.some(u => u.login == login)
+}
+
+function generateToken() {
+  let token = ''
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+  for (let i = 0; i < 27; i++) {
+    token += chars[Math.floor(Math.random() * 62)]
+  }
+
+  return token
+}
+
+function recognizeToken(token) {
+  return users.find((user) => user.token == token)?.login
 }

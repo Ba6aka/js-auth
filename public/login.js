@@ -8,11 +8,10 @@ form.onsubmit = handleSubmit
 async function handleSubmit() {
   const login = form.login.value
   const password = form.password.value
+  const token = await logIn(login, password)
 
-  const accessGranted = await logIn(login, password)
-  if (accessGranted == 'true') {
-
-    setCurrentUser(login)
+  if (token) {
+    setCurrentUser(token)
 
     return location.href = 'private.html'
   }
@@ -20,8 +19,8 @@ async function handleSubmit() {
   alert('incorrect login or password, please try again')
 }
 
-function setCurrentUser(login) {
-  localStorage.currentUser =login
+function setCurrentUser(token) {
+  localStorage.currentUserToken =token
 }
 
 async function handleVisitor() {
