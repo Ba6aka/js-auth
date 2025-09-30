@@ -1,6 +1,5 @@
 const [form] = document.forms
 const users = []
-
 handleVisitor()
 
 form.onsubmit = handleSubmit
@@ -20,15 +19,7 @@ async function handleSubmit() {
 }
 
 function setCurrentUser(token) {
-  localStorage.currentUserToken =token
-}
-
-async function handleVisitor() {
-  const login = localStorage.currentUser
-
-  if (login) location.href = 'private.html'
-
-  document.body.hidden = false
+  localStorage.currentUserToken = token
 }
 
 async function logIn(login, password) {

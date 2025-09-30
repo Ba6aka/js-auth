@@ -37,14 +37,6 @@ function isOccupied(login) {
   }
 }
 
-function handleVisitor() {
-  const login = localStorage.currentUser
-
-  if (login) location.href = 'private.html'
-
-  document.body.hidden = false
-}
-
 function trimValues() {
   form.login.value = form.login.value.trim()
   form.login.value = form.login.value.trim()
