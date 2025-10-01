@@ -6,7 +6,7 @@ handleVisitor(true)
 logoutBtn.onclick = handleLogout
 
 function handleLogout() {
-  localStorage.removeItem('currentUser')
+  localStorage.removeItem('currentUserToken')
   location.href = 'index.html'
 }
 
