@@ -11,7 +11,6 @@ async function handleSubmit() {
 
   if (token) {
     setCurrentUser(token)
-
     return location.href = 'private.html'
   }
 

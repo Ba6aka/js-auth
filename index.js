@@ -1,27 +1,26 @@
 const { MongoClient } = require('mongodb')
 const { Server } = require('http')
 const { createReadStream, readFileSync, writeFileSync } = require('fs')
-const { Readable, Stream } = require('stream')
-const users = []
+// const users = []
 const path = 'data/users.json'
-
-// Your Atlas connection string
+let db, usersCollection, allUsers
 const connectionString = 'mongodb+srv://ba6aka:zalupa@cluster0.zkbmsbi.mongodb.net/'
-
-// Create client
 const client = new MongoClient(connectionString)
 const dbName = 'registartionAPP'
+
+// loadUsers()
+
+connectDB().then(async () => {
+  db = client.db(dbName)
+  usersCollection = db.collection('users')
+  allUsers = await usersCollection.find().toArray()
+  runServer(999, handleRequest)
+})
+
 async function connectDB() {
   await client.connect()
   console.log('Connected to MongoDB Atlas')
-  return client.db(dbName)
 }
-
-(async () => {
-  loadUsers()
-  const db = await connectDB()
-  runServer(999, (req, res) => handleRequest(req, res, db))
-})()
 
 function runServer(port, handler) {
   const server = new Server()
@@ -30,7 +29,7 @@ function runServer(port, handler) {
   server.listen(port, () => console.log('http://localhost:' + port))
 }
 
-function handleRequest(request, response, db) {
+function handleRequest(request, response) {
 
   if (request.url.startsWith('/api/')) {
     handleAPI(request, response, db)
@@ -45,12 +44,11 @@ function serveStatic(request, response) {
   createReadStream(path).on('error', handle404(response)).pipe(response)
 }
 
-function handleAPI(request, response, db) {
+function handleAPI(request, response) {
   const route = request.url.slice(5)
-  const users = db.collection('users')
 
-  if (request.method == 'GET') handleGetAPI(request, route, response, users)
-  if (request.method == 'POST') handlePostAPI(request, response, route, users)
+  if (request.method == 'GET') handleGetAPI(request, route, response)
+  if (request.method == 'POST') handlePostAPI(request, response, route)
 }
 
 function handleGetAPI(request, route, response) {
@@ -78,49 +76,39 @@ async function getBody(stream) {
   return body
 }
 
-function checkUser({ login, password }) {
-  for (const u of users) {
-    if (login == u.login) {
-      return password == u.password && u
-    }
-  }
-  return false
+async function checkUser({ login, password }) {
+  const user = await usersCollection.findOne({ login, password })
+  return user
 }
 
-async function handlePostAPI(request, response, route, users) {
-  // if (route == 'user') {
-  //   const newUser = await getBody(request)
-
-  //   if (isOccupied(newUser.login)) {
-  //     response.end('occupied')
-  //   }
-  //   else {
-  //     users.push(newUser)
-  //     saveUsers()
-  //     response.end('registered')
-  //   }
-  // }
-
+async function handlePostAPI(request, response, route) {
   if (route == 'user') {
     const newUser = await getBody(request)
-    const word = await users.insertOne(newUser);
-    newUser._id = word.insertedId;
-    const fil = JSON.stringify(newUser);
 
-    // response.end(fil);
-    response.end('registered')
-
+    if (await isOccupied(newUser.login)) {
+      response.end('occupied')
+    }
+    else {
+      await usersCollection.insertOne(newUser);
+      allUsers.push(newUser)
+      saveUsers()
+      response.end('registered')
+    }
   }
+
   else if (route == 'log-in') {
     const credentials = await getBody(request)
-    const user = checkUser(credentials)
+    const user = await checkUser(credentials)
 
     if (user) {
       const token = generateToken()
+      user.token = token
 
       response.end(token)
-      user.token = token
-      saveUsers()
+      usersCollection.updateOne(
+        { _id: user._id },
+        { $set: user }
+      )
     }
     else {
       response.statusCode = 401
@@ -130,29 +118,24 @@ async function handlePostAPI(request, response, route, users) {
 
   else if (route == 'auth') {
     const token = await getBody(request)
-    const login = recognizeToken(token)
+    const userObject = await recognizeToken(token)
 
-    response.end(login || '')
+    response.end(userObject?.login || '')
   }
 
-
-
+  else if (route == "log-out") {
+    const token = await getBody(request)
+    const user = await usersCollection.findOne({ token })
+    user.token = ''
+    usersCollection.updateOne(
+      { _id: user._id },
+      { $set: user }
+    )
+  }
 }
 
-function loadUsers() {
-  const loadedUsers = JSON.parse(readFileSync(path, 'utf8'))
-
-  users.push(...loadedUsers)
-}
-
-function saveUsers() {
-  const json = JSON.stringify(users)
-
-  writeFileSync(path, json)
-}
-
-function isOccupied(login) {
-  return users.some(u => u.login == login)
+async function isOccupied(login) {
+  return allUsers.some(u => u.login == login)
 }
 
 function generateToken() {
@@ -167,5 +150,5 @@ function generateToken() {
 }
 
 function recognizeToken(token) {
-  return users.find((user) => user.token == token)?.login
+  return usersCollection.findOne({ token })
 }
