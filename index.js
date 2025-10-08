@@ -1,9 +1,12 @@
+try { require("./env.js") } catch { }
+
 const { MongoClient } = require('mongodb')
 const { runServer } = require('./server/run-server.js')
 const { handleRequest } = require('./server/handlers/handle-request.js')
 
+const { DB_USER, DB_PWD } = process.env
 let db, usersCollection, allUsers
-const connectionString = 'mongodb+srv://ba6aka:zalupa@cluster0.zkbmsbi.mongodb.net/'
+const connectionString = `mongodb+srv://${DB_USER}ba6aka:${DB_PWD}zalupa@cluster0.zkbmsbi.mongodb.net/`
 const client = new MongoClient(connectionString)
 const dbName = 'registartionAPP'
 
