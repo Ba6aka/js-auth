@@ -6,7 +6,7 @@ const { handleRequest } = require('./server/handlers/handle-request.js')
 
 const { DB_USER, DB_PWD } = process.env
 let db, usersCollection, allUsers
-const connectionString = `mongodb+srv://${DB_USER}ba6aka:${DB_PWD}zalupa@cluster0.zkbmsbi.mongodb.net/`
+const connectionString = `mongodb+srv://${DB_USER}:${DB_PWD}@cluster0.zkbmsbi.mongodb.net/`
 const client = new MongoClient(connectionString)
 const dbName = 'registartionAPP'
 
