@@ -4,5 +4,15 @@
   },
   "devDependencies": {
     "@types/node": "^24.6.2"
-  }
+  },
+  "name": "js-auth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
