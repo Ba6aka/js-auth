@@ -3,17 +3,21 @@ const { isOccupied } = require('../helpers/is-occupied.js')
 const { checkUser } = require('../helpers/check-user.js')
 const { generateToken } = require('../helpers/generete-token.js')
 const { recognizeToken } = require('../helpers/recognize-token.js')
+const { hashPassword } = require('../helpers/hash-password.js')
 
 async function handlePostAPI(request, response, route, db) {
   usersCollection = db.collection('users')
 
   if (route == 'user') {
-    const newUser = await getBody(request)
+    const { login, password } = await getBody(request)
+    const hash = await hashPassword(password)
 
-    if (await isOccupied(usersCollection, newUser.login)) {
+    if (await isOccupied(usersCollection, login)) {
       response.end('occupied')
     }
     else {
+      const newUser = { login, hash }
+
       await usersCollection.insertOne(newUser);
       response.end('registered')
     }
